@@ -20,6 +20,8 @@ const FILL_PADDING =
   "px-[7cqmin] pt-[max(7cqmin,4.5rem)] pb-[max(7cqmin,3.5rem)] " +
   "landscape:pt-[7cqmin] landscape:pb-[7cqmin] landscape:pr-[6rem]";
 
+const FILL_SCROLLBAR = "[scrollbar-width:thin] [scrollbar-color:rgb(0_0_0/0.2)_transparent]";
+
 /**
  * スライド1枚。文字の大きさは枠の短い辺に対する割合（cqmin）× 縮小率（--slide-fit、既定 1）。
  * 発表モードでは、入りきらないときに縮小率を下げて全文が見えるようにする（useFitToFrame）。
@@ -44,7 +46,11 @@ export function SlideView({ slide, fill = false }: Props) {
       ref={markerRef}
       className="group relative flex min-h-0 min-w-0 flex-1 flex-col"
     >
-      <div ref={scrollerRef} className="flex min-h-0 flex-1 flex-col overflow-auto">
+      <div
+        ref={scrollerRef}
+        // 発表モードでスクロールが必要なときのバーは、細く薄くして目立たなくする
+        className={`flex min-h-0 flex-1 flex-col overflow-auto ${fill ? FILL_SCROLLBAR : ""}`}
+      >
         <SlideContent slide={slide} />
       </div>
       {fill && <MoreIndicator />}

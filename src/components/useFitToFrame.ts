@@ -50,6 +50,10 @@ export function useFitToFrame(enabled: boolean, contentKey: unknown, refs: Refs)
       const basePx = Math.min(frame.clientWidth, frame.clientHeight) * BODY_RATIO;
       const minFit = Math.min(1, Math.max(MIN_BODY_PX / basePx, MIN_FIT_RATIO));
 
+      // 測っている間はスクロールバーを出さない。Windows などスクロールバーが幅を取る環境では、
+      // 途中でバーが出たり消えたりすると本文の幅が変わり、正しく測れないため
+      scroller.style.overflowY = "hidden";
+
       setFit(1);
       if (fits()) {
         needsScroll = false;
@@ -70,6 +74,14 @@ export function useFitToFrame(enabled: boolean, contentKey: unknown, refs: Refs)
           setFit(lo);
           needsScroll = false;
         }
+      }
+      // 入ったときはスクロールさせない。fits() は 1px のはみ出しを許しているので、
+      // auto のままだと、その 1px のために Windows でスクロールバーが出てしまう
+      // （はみ出す 1px は行の上下の余白なので、隠しても文字は欠けない）
+      if (needsScroll) {
+        scroller.style.overflowY = "auto";
+      } else {
+        scroller.scrollTop = 0;
       }
       updateOverflow();
     };
