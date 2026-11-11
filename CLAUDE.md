@@ -61,3 +61,4 @@ No test framework is set up yet. If one is needed, see `node_modules/next/dist/d
 - 変更のたびに npm run lint と npm run build を通してから完了報告する
 - サンプルデータは自作ゲームか伝統ゲーム（将棋・オセロ・トランプ等）だけ。市販ゲームの説明書の文章は使わない
 - コミットメッセージは日本語で、何をなぜ変えたかを書く
+- 1人で開発しているので、ブランチは作らず main に直接コミットする
