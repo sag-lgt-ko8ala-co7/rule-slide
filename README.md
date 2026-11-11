@@ -6,7 +6,7 @@
 ![スクリーンショット](docs/screenshot.png)
 
 ## 公開URL
-https://（Vercel のURL）
+https://rule-slide.vercel.app
 
 ## できること
 - ゲームの基本情報（人数・時間・対象・概要・勝利条件）とルール項目を登録
