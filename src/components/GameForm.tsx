@@ -3,10 +3,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState, type FormEvent } from "react";
-import { createGame, updateGame } from "@/lib/storage";
+import { createGame, STORAGE_LIMIT, StorageFullError, updateGame } from "@/lib/storage";
 import type { Game, GameInput } from "@/lib/types";
+import { useStorageUsage } from "@/lib/useGames";
 import { HIGHLIGHT_HINT, HINT_CLASS } from "./Highlighted";
+import { PhotoField } from "./PhotoField";
 import { RuleItemsEditor } from "./RuleItemsEditor";
+
+/** 文字数を「1.2MB」の形にする（写真は base64 なので文字数 ≒ バイト数）。 */
+function formatMB(chars: number): string {
+  return `${(chars / 1_000_000).toFixed(1)}MB`;
+}
 
 // 初期表示用の空のルール項目。レンダー中に乱数IDを作らないよう固定IDにしている
 // （追加ボタンで増やす項目はクリック時に crypto.randomUUID() で作る）。
@@ -18,10 +25,11 @@ const EMPTY_INPUT: GameInput = {
   audience: "",
   overview: "",
   winCondition: "",
-  rules: [{ id: "initial-rule", heading: "", body: "" }],
+  coverPhotoId: null,
+  rules: [{ id: "initial-rule", heading: "", body: "", photoId: null }],
 };
 
-type TextField = Exclude<keyof GameInput, "rules">;
+type TextField = Exclude<keyof GameInput, "rules" | "coverPhotoId">;
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
@@ -35,6 +43,7 @@ function toInput(game: Game): GameInput {
     audience: game.audience,
     overview: game.overview,
     winCondition: game.winCondition,
+    coverPhotoId: game.coverPhotoId,
     rules: game.rules,
   };
 }
@@ -52,6 +61,7 @@ export function GameForm({ game }: Props) {
   );
   const [error, setError] = useState<string | null>(null);
   const idPrefix = useId();
+  const usage = useStorageUsage();
 
   function setField(field: TextField, text: string) {
     setValue((prev) => ({ ...prev, [field]: text }));
@@ -75,8 +85,12 @@ export function GameForm({ game }: Props) {
         setError(null);
         router.push(`/games/${created.id}`);
       }
-    } catch {
-      setError("保存できませんでした。端末の空き容量を確認してください。");
+    } catch (e) {
+      setError(
+        e instanceof StorageFullError
+          ? "保存できる容量がいっぱいです。写真を減らすか、ほかのゲームを削除してから保存してください。"
+          : "保存できませんでした。端末の空き容量を確認してください。",
+      );
     }
   }
 
@@ -139,6 +153,11 @@ export function GameForm({ game }: Props) {
         </div>
         {textArea("overview", "概要")}
         {textArea("winCondition", "勝利条件")}
+        <PhotoField
+          label="表紙の写真（箱の写真など）"
+          photoId={value.coverPhotoId}
+          onChange={(coverPhotoId) => setValue((prev) => ({ ...prev, coverPhotoId }))}
+        />
       </fieldset>
 
       <RuleItemsEditor
@@ -149,6 +168,12 @@ export function GameForm({ game }: Props) {
       {error && (
         <p role="alert" className="text-red-700 dark:text-red-400">
           {error}
+        </p>
+      )}
+
+      {usage !== null && (
+        <p className={HINT_CLASS}>
+          この端末の保存容量：{formatMB(usage)}／約{formatMB(STORAGE_LIMIT)}
         </p>
       )}
 

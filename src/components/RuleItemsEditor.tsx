@@ -3,6 +3,7 @@
 import { useId } from "react";
 import type { RuleItem } from "@/lib/types";
 import { HIGHLIGHT_HINT, HINT_CLASS } from "./Highlighted";
+import { PhotoField } from "./PhotoField";
 
 type Props = {
   rules: RuleItem[];
@@ -21,7 +22,7 @@ export function RuleItemsEditor({ rules, onChange }: Props) {
   }
 
   function add() {
-    onChange([...rules, { id: crypto.randomUUID(), heading: "", body: "" }]);
+    onChange([...rules, { id: crypto.randomUUID(), heading: "", body: "", photoId: null }]);
   }
 
   function remove(id: string) {
@@ -81,6 +82,11 @@ export function RuleItemsEditor({ rules, onChange }: Props) {
                 1行が箇条書きの1つになります。{HIGHLIGHT_HINT}
               </span>
             </label>
+            <PhotoField
+              label="写真（本文と並べて表示します）"
+              photoId={rule.photoId}
+              onChange={(photoId) => update(rule.id, { photoId })}
+            />
           </li>
         ))}
       </ol>

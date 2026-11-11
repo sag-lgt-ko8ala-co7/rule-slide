@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import type { Slide } from "@/lib/slides";
+import { getPhoto } from "@/lib/storage";
 import { Highlighted } from "./Highlighted";
 import { useFitToFrame } from "./useFitToFrame";
 
@@ -32,21 +33,55 @@ export function SlideView({ slide, fill = false }: Props) {
   const frame = fill
     ? "h-full w-full"
     : "aspect-video w-full rounded-lg border border-zinc-200 shadow-sm dark:border-zinc-700";
+
+  // 写真のデータが見つからないとき（別の端末で作ったなど）は、写真なしと同じ並べ方にする
+  const photo = "photoId" in slide && slide.photoId ? getPhoto(slide.photoId) : undefined;
+
+  // 文章の部分。文字を自動で小さくする仕組みは、この中の高さだけを測る
+  const textArea = (
+    <div
+      key={photo ? "text-with-photo" : "text-only"}
+      ref={markerRef}
+      className="group relative flex min-h-0 min-w-0 flex-1 flex-col"
+    >
+      <div ref={scrollerRef} className="flex min-h-0 flex-1 flex-col overflow-auto">
+        <SlideContent slide={slide} />
+      </div>
+      {fill && <MoreIndicator />}
+    </div>
+  );
+
   return (
     <div
       ref={frameRef}
       className={`${frame} overflow-hidden bg-white text-zinc-900 [container-type:size]`}
     >
       <div className={`flex h-full flex-col ${fill ? FILL_PADDING : "p-[8.9cqmin]"}`}>
-        <div ref={markerRef} className="group relative flex min-h-0 flex-1 flex-col">
-          <div ref={scrollerRef} className="flex min-h-0 flex-1 flex-col overflow-auto">
-            <SlideContent slide={slide} />
+        {photo ? (
+          // 写真はスクロールする領域の外に置き、割り当てた場所に縦横比を保って収める
+          // （並べ方は globals.css の .slide-split。枠の向きで左右／上下を切り替える）
+          // key を分けて、写真の有無が変わったら要素を作り直す（同じ div を使い回すと、
+          // useFitToFrame が直接付けた data-overflow が古い要素に残るため）
+          <div key="with-photo" className="slide-split min-h-0 flex-1" data-layout={slide.kind}>
+            {textArea}
+            <div className="slide-split-photo">
+              {/* data URL の写真なので next/image の最適化は使えない */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo} alt={photoAlt(slide)} className="h-full w-full object-contain" />
+            </div>
           </div>
-          {fill && <MoreIndicator />}
-        </div>
+        ) : (
+          textArea
+        )}
       </div>
     </div>
   );
+}
+
+function photoAlt(slide: Slide): string {
+  if (slide.kind === "cover") return "表紙の写真";
+  if (slide.kind === "rule") return `${slide.heading ?? "ルール"}の写真`;
+  return "";
 }
 
 /** 下限の大きさでも入りきらず、まだ下に続きがあるときだけ出す。 */

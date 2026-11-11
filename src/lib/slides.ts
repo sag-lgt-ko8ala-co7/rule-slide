@@ -3,10 +3,10 @@
 import type { Game } from "./types";
 
 export type Slide =
-  | { kind: "cover"; title: string; facts: { label: string; value: string }[] }
+  | { kind: "cover"; title: string; facts: { label: string; value: string }[]; photoId: string | null }
   | { kind: "text"; heading: string; text: string }
   /** heading が null のときは見出しなし（本文だけ）のスライド */
-  | { kind: "rule"; heading: string | null; bullets: string[] }
+  | { kind: "rule"; heading: string | null; bullets: string[]; photoId: string | null }
   | { kind: "start"; title: string };
 
 /** 改行で分け、前後の空白を取り、空行を除く。 */
@@ -30,7 +30,7 @@ export function buildSlides(game: Game): Slide[] {
     { label: "時間", value: game.playTime.trim() },
     { label: "対象", value: game.audience.trim() },
   ].filter((fact) => fact.value !== "");
-  slides.push({ kind: "cover", title: game.name, facts });
+  slides.push({ kind: "cover", title: game.name, facts, photoId: game.coverPhotoId });
 
   const overview = game.overview.trim();
   if (overview !== "") {
@@ -45,9 +45,10 @@ export function buildSlides(game: Game): Slide[] {
   game.rules.forEach((rule) => {
     const heading = rule.heading.trim();
     const bullets = splitLines(rule.body);
-    if (heading === "" && bullets.length === 0) return;
+    // 見出しも本文も写真もない項目はスライドにしない
+    if (heading === "" && bullets.length === 0 && rule.photoId === null) return;
     // 見出しが空なら、仮の見出しは付けず本文だけのスライドにする
-    slides.push({ kind: "rule", heading: heading || null, bullets });
+    slides.push({ kind: "rule", heading: heading || null, bullets, photoId: rule.photoId });
   });
 
   slides.push({ kind: "start", title: game.name });

@@ -23,3 +23,30 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/*
+ * 写真付きスライドの並べ方（SlideView）。スライドの枠（container-type: size）の向きで切り替える。
+ * - 縦長の枠：上下に並べる。写真の高さは約40%。表紙は写真が上、ルールは本文が上
+ * - 横長の枠：左右に並べる。写真の幅は約45%。表紙は写真が左、ルールは本文が左
+ */
+.slide-split {
+  display: flex;
+  flex-direction: column;
+  gap: 4cqmin;
+}
+.slide-split-photo {
+  flex: 0 0 40%;
+  min-width: 0;
+  min-height: 0;
+}
+.slide-split[data-layout="cover"] .slide-split-photo {
+  order: -1;
+}
+@container (orientation: landscape) {
+  .slide-split {
+    flex-direction: row;
+  }
+  .slide-split-photo {
+    flex-basis: 45%;
+  }
+}

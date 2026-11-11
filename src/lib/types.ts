@@ -5,6 +5,8 @@ export type RuleItem = {
   heading: string;
   /** 本文（改行可） */
   body: string;
+  /** 写真の id（storage.ts の savePhoto で保存したもの）。写真がなければ null */
+  photoId: string | null;
 };
 
 /** 登録したゲーム。人数・時間などは F-01 のとおり自由記述のテキスト。 */
@@ -24,6 +26,8 @@ export type Game = {
   overview: string;
   /** 勝利条件 */
   winCondition: string;
+  /** 表紙の写真の id。写真がなければ null */
+  coverPhotoId: string | null;
   /** 配列の順番がそのままスライドの順番になる */
   rules: RuleItem[];
   /** ISO 8601 */

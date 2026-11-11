@@ -15,9 +15,11 @@ export const SAMPLE_GAME: Game = {
   overview:
     "赤・青・緑・黄の宝石カードを場から拾い、同じ色をそろえて並べて点数にする手札ゲーム。",
   winCondition: "山札がなくなってゲームが終わったとき、点数がいちばん多い人の勝ち。",
+  coverPhotoId: null,
   rules: [
     {
       id: "sample-rule-setup",
+      photoId: null,
       heading: "準備",
       body: [
         "宝石カードは4色×数字1〜5が2枚ずつ、全部で40枚",
@@ -28,6 +30,7 @@ export const SAMPLE_GAME: Game = {
     },
     {
       id: "sample-rule-turn",
+      photoId: null,
       heading: "手番の流れ",
       body: [
         "【拾う】か【並べる】のどちらか1つを行う",
@@ -38,11 +41,13 @@ export const SAMPLE_GAME: Game = {
     },
     {
       id: "sample-rule-hand",
+      photoId: null,
       heading: "手札の上限",
       body: ["手札は5枚まで", "6枚になったら、1枚を選んで場に捨てる"].join("\n"),
     },
     {
       id: "sample-rule-score",
+      photoId: null,
       heading: "点数の数え方",
       body: [
         "自分の前に並べたカードの数字を合計する",
@@ -51,6 +56,7 @@ export const SAMPLE_GAME: Game = {
     },
     {
       id: "sample-rule-end",
+      photoId: null,
       heading: "ゲームの終わり",
       body: [
         "場の補充で山札がなくなったら、その手番でゲーム終了",
@@ -60,6 +66,7 @@ export const SAMPLE_GAME: Game = {
     {
       // 見出しなし（本文だけ）のスライドの例
       id: "sample-rule-tip",
+      photoId: null,
       heading: "",
       body: "困ったら、手番の人に有利になるように決めてよい",
     },
