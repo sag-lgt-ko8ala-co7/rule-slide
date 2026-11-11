@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import type { Slide } from "@/lib/slides";
+import { Highlighted } from "./Highlighted";
 import { useFitToFrame } from "./useFitToFrame";
 
 type Props = {
@@ -85,19 +86,21 @@ function SlideContent({ slide }: { slide: Slide }) {
         <>
           <SlideHeading>{slide.heading}</SlideHeading>
           <p className="mt-[calc(4.4cqmin*var(--slide-fit,1))] whitespace-pre-wrap wrap-anywhere text-[calc(6.4cqmin*var(--slide-fit,1))] leading-relaxed">
-            {slide.text}
+            <Highlighted text={slide.text} />
           </p>
         </>
       );
     case "rule":
       return (
         <>
-          <SlideHeading>{slide.heading}</SlideHeading>
+          {slide.heading !== null && <SlideHeading>{slide.heading}</SlideHeading>}
           {slide.bullets.length > 0 && (
-            <ul className="mt-[calc(4.4cqmin*var(--slide-fit,1))] list-disc space-y-[calc(1.8cqmin*var(--slide-fit,1))] pl-[calc(7.1cqmin*var(--slide-fit,1))] text-[calc(6.4cqmin*var(--slide-fit,1))] leading-relaxed">
+            <ul
+              className={`${slide.heading !== null ? "mt-[calc(4.4cqmin*var(--slide-fit,1))]" : ""} list-disc space-y-[calc(1.8cqmin*var(--slide-fit,1))] pl-[calc(7.1cqmin*var(--slide-fit,1))] text-[calc(6.4cqmin*var(--slide-fit,1))] leading-relaxed`}
+            >
               {slide.bullets.map((bullet, index) => (
                 <li key={index} className="wrap-anywhere">
-                  {bullet}
+                  <Highlighted text={bullet} />
                 </li>
               ))}
             </ul>

@@ -1,6 +1,8 @@
 "use client";
 
+import { useId } from "react";
 import type { RuleItem } from "@/lib/types";
+import { HIGHLIGHT_HINT, HINT_CLASS } from "./Highlighted";
 
 type Props = {
   rules: RuleItem[];
@@ -12,6 +14,8 @@ const inputClass =
 
 /** ルール項目（見出し＋本文）の入力・追加・削除。状態は親が持つ。 */
 export function RuleItemsEditor({ rules, onChange }: Props) {
+  const idPrefix = useId();
+
   function update(id: string, patch: Partial<Omit<RuleItem, "id">>) {
     onChange(rules.map((rule) => (rule.id === id ? { ...rule, ...patch } : rule)));
   }
@@ -57,8 +61,12 @@ export function RuleItemsEditor({ rules, onChange }: Props) {
                 value={rule.heading}
                 onChange={(e) => update(rule.id, { heading: e.target.value })}
                 placeholder="例：手番の流れ"
+                aria-describedby={`${idPrefix}-${rule.id}-heading-hint`}
                 className={inputClass}
               />
+              <span id={`${idPrefix}-${rule.id}-heading-hint`} className={`block ${HINT_CLASS}`}>
+                空にすると、見出しなしで本文だけのスライドになります
+              </span>
             </label>
             <label className="block space-y-1">
               <span className="text-sm">本文</span>
@@ -66,8 +74,12 @@ export function RuleItemsEditor({ rules, onChange }: Props) {
                 value={rule.body}
                 onChange={(e) => update(rule.id, { body: e.target.value })}
                 rows={4}
+                aria-describedby={`${idPrefix}-${rule.id}-body-hint`}
                 className={inputClass}
               />
+              <span id={`${idPrefix}-${rule.id}-body-hint`} className={`block ${HINT_CLASS}`}>
+                1行が箇条書きの1つになります。{HIGHLIGHT_HINT}
+              </span>
             </label>
           </li>
         ))}

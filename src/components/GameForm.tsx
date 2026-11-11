@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 import { createGame, updateGame } from "@/lib/storage";
 import type { Game, GameInput } from "@/lib/types";
+import { HIGHLIGHT_HINT, HINT_CLASS } from "./Highlighted";
 import { RuleItemsEditor } from "./RuleItemsEditor";
 
 // 初期表示用の空のルール項目。レンダー中に乱数IDを作らないよう固定IDにしている
@@ -50,6 +51,7 @@ export function GameForm({ game }: Props) {
     game ? toInput(game) : EMPTY_INPUT,
   );
   const [error, setError] = useState<string | null>(null);
+  const idPrefix = useId();
 
   function setField(field: TextField, text: string) {
     setValue((prev) => ({ ...prev, [field]: text }));
@@ -93,7 +95,9 @@ export function GameForm({ game }: Props) {
     );
   }
 
+  /** 複数行の入力欄。下にマーカー強調の使い方を出す。 */
   function textArea(field: TextField, label: string) {
+    const hintId = `${idPrefix}-${field}-hint`;
     return (
       <label className="block space-y-1">
         <span className="text-sm">{label}</span>
@@ -101,8 +105,12 @@ export function GameForm({ game }: Props) {
           value={value[field]}
           onChange={(e) => setField(field, e.target.value)}
           rows={3}
+          aria-describedby={hintId}
           className={inputClass}
         />
+        <span id={hintId} className={`block ${HINT_CLASS}`}>
+          {HIGHLIGHT_HINT}
+        </span>
       </label>
     );
   }
