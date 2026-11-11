@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { use, useState } from "react";
+import { use, useMemo } from "react";
 import { browser } from "react-dom";
-import { loadGames, sortGamesByKana } from "@/lib/storage";
+import { sortGamesByKana } from "@/lib/storage";
+import { useGames } from "@/lib/useGames";
 
 export function GameList() {
   use(browser("ゲームはこの端末の localStorage に保存されています。"));
 
-  const [games] = useState(() => sortGamesByKana(loadGames()));
+  const allGames = useGames();
+  const games = useMemo(() => sortGamesByKana(allGames), [allGames]);
 
   if (games.length === 0) {
     return (

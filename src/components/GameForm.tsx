@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { createGame } from "@/lib/storage";
-import type { GameInput } from "@/lib/types";
+import { createGame, updateGame } from "@/lib/storage";
+import type { Game, GameInput } from "@/lib/types";
 import { RuleItemsEditor } from "./RuleItemsEditor";
 
 // 初期表示用の空のルール項目。レンダー中に乱数IDを作らないよう固定IDにしている
@@ -25,14 +25,30 @@ type TextField = Exclude<keyof GameInput, "rules">;
 const inputClass =
   "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
 
+function toInput(game: Game): GameInput {
+  return {
+    name: game.name,
+    nameKana: game.nameKana,
+    players: game.players,
+    playTime: game.playTime,
+    audience: game.audience,
+    overview: game.overview,
+    winCondition: game.winCondition,
+    rules: game.rules,
+  };
+}
+
 type Props = {
-  initialValue?: GameInput;
+  /** 指定すると編集モード。省略すると新規作成。 */
+  game?: Game;
 };
 
-/** ゲームの基本情報とルール項目の入力フォーム（新規作成用。編集画面でも再利用する予定）。 */
-export function GameForm({ initialValue = EMPTY_INPUT }: Props) {
+/** ゲームの基本情報とルール項目の入力フォーム（新規作成と編集で共通）。 */
+export function GameForm({ game }: Props) {
   const router = useRouter();
-  const [value, setValue] = useState<GameInput>(initialValue);
+  const [value, setValue] = useState<GameInput>(() =>
+    game ? toInput(game) : EMPTY_INPUT,
+  );
   const [error, setError] = useState<string | null>(null);
 
   function setField(field: TextField, text: string) {
@@ -45,9 +61,18 @@ export function GameForm({ initialValue = EMPTY_INPUT }: Props) {
       setError("ゲーム名を入力してください。");
       return;
     }
+    const input = { ...value, name: value.name.trim() };
     try {
-      const game = createGame({ ...value, name: value.name.trim() });
-      router.push(`/games/${game.id}`);
+      if (game) {
+        updateGame(game.id, input);
+        router.push(`/games/${game.id}`);
+      } else {
+        const created = createGame(input);
+        // /new の画面は移動後も隠れて残るため、次に開いたとき空になるよう戻しておく
+        setValue(EMPTY_INPUT);
+        setError(null);
+        router.push(`/games/${created.id}`);
+      }
     } catch {
       setError("保存できませんでした。端末の空き容量を確認してください。");
     }
@@ -121,7 +146,7 @@ export function GameForm({ initialValue = EMPTY_INPUT }: Props) {
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Link
-          href="/"
+          href={game ? `/games/${game.id}` : "/"}
           className="rounded-md border border-zinc-300 px-6 py-2 text-center dark:border-zinc-700"
         >
           キャンセル
