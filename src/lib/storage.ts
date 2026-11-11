@@ -2,6 +2,7 @@
 // localStorage はサーバーでは使えないため、クライアントコンポーネントのブラウザ描画時か
 // イベントハンドラの中からだけ呼ぶこと。
 
+import { SAMPLE_GAME } from "./sampleGame";
 import type { Game, GameInput, RuleItem } from "./types";
 
 const STORAGE_KEY = "rule-slide:games:v1";
@@ -44,7 +45,9 @@ function readRaw(): string | null {
 }
 
 function parseGames(raw: string | null): Game[] {
-  if (raw === null) return [];
+  // 一度も保存したことがない（初めて開いた）ときだけサンプルを見せる。
+  // 削除などで一度でも保存すると [] などが入るので、それ以降は出ない。
+  if (raw === null) return [SAMPLE_GAME];
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -82,13 +85,14 @@ export function subscribe(listener: () => void): () => void {
   };
 }
 
-let cachedRaw: string | null = null;
+// undefined は「まだ一度も読んでいない」。null（保存データなし）と区別する
+let cachedRaw: string | null | undefined = undefined;
 let cachedGames: Game[] = [];
 
 /** 保存内容が変わっていなければ前回と同じ配列（同じ参照）を返す。 */
 export function getGamesSnapshot(): Game[] {
   const raw = readRaw();
-  if (raw !== cachedRaw) {
+  if (cachedRaw === undefined || raw !== cachedRaw) {
     cachedRaw = raw;
     cachedGames = parseGames(raw);
   }
